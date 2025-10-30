@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For You — A Night of Quotes 🌑</title>
+  <style>
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      background: radial-gradient(ellipse at 20% 10%, #0b0b0f 0%, #040306 40%, #000 100%);
+      color:#fff;display:flex;align-items:center;justify-content:center;padding:28px;
+    }
+
+    .stage{width:100%;max-width:900px;border-radius:16px;padding:28px;position:relative;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.8);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+
+    .center{display:flex;flex-direction:column;align-items:center;gap:18px}
+
+    .quote-card{
+      width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;padding:28px;border-radius:14px;background:linear-gradient(180deg, rgba(255,0,60,0.03), rgba(0,0,0,0.35));border:1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 -8px 60px rgba(255,0,60,0.02);
+      transform:translateY(0);transition:transform 480ms cubic-bezier(.2,.9,.2,1), opacity 420ms ease;
+      text-align:center;padding-left:40px;padding-right:40px
+    }
+
+    .quote{font-size:22px;line-height:1.4;letter-spacing:0.2px;color:rgba(255,255,255,0.95)}
+    .author{margin-top:12px;font-size:14px;color:rgba(255,255,255,0.6)}
+
+    .controls{display:flex;gap:12px;align-items:center;margin-top:6px}
+    .btn{padding:12px 18px;border-radius:12px;border:0;cursor:pointer;font-weight:700}
+    .btn-next{background:linear-gradient(90deg,#c01b3a,#88112a);color:#fff}
+    .btn-skip{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff}
+
+    .progress{height:8px;width:60%;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden}
+    .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ff6b92,#d02b4b)}
+
+    /* cinematic accents */
+    .film-bars{position:absolute;left:0;right:0;height:36px;top:0;background:linear-gradient(90deg,rgba(0,0,0,0.35),transparent);pointer-events:none}
+    .film-bars.bottom{top:auto;bottom:0;transform:translateY(8px)}
+
+    /* final reveal */
+    .reveal{display:none;flex-direction:column;align-items:center;gap:14px}
+    .reveal.show{display:flex}
+    .photo{width:320px;height:420px;border-radius:12px;overflow:hidden;border:6px solid rgba(255,255,255,0.04);box-shadow:0 30px 90px rgba(0,0,0,0.7);background:#000}
+    .photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .final-msg{font-size:18px;text-align:center;color:rgba(255,220,220,0.95);line-height:1.4}
+
+    /* subtle glow lines */
+    .glow{position:absolute;left:-20%;top:10%;width:140%;height:220px;pointer-events:none;mix-blend-mode:screen;filter:blur(36px);opacity:0.25}
+    .glow:before{content:'';position:absolute;left:10%;top:20%;width:30%;height:100%;background:linear-gradient(90deg,#7a1220,#ff4d6e);transform:skewX(-18deg);border-radius:12px}
+
+    /* responsive */
+    @media (max-width:700px){.photo{width:260px;height:340px}.quote{font-size:18px}.progress{width:80%}}
+    .photo-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 0;
+}
+
+.couple-photo {
+  width: 80%;
+  max-width: 400px;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(255, 0, 100, 0.5);
+  filter: brightness(0.8) contrast(1.1) saturate(1.2);
+  transition: all 1.5s ease-in-out;
+}
+
+.couple-photo:hover {
+  transform: scale(1.05);
+  filter: brightness(1) contrast(1.3) saturate(1.3);
+}
+
+  </style>
+</head>
+<body>
+  <!--
+    One-button cinematic quote flow.
+    Usage: replace 'your-photo.jpg' and (optionally) 'romantic-melody.mp3' in the same folder.
+    Personalize the constants in the script section: toName, fromName, musicOn (true/false).
+  -->
+
+  <div class="stage">
+    <div class="film-bars"></div>
+    <div class="glow"></div>
+
+    <div class="center">
+      <div class="quote-card" id="quoteCard">
+        <div>
+          <div class="quote" id="quoteText">"A night sky full of stars can’t compare to the sparkle in your eyes."</div>
+          <div class="author" id="quoteAuthor">— Your secret admirer</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-skip" id="restartBtn">Restart</button>
+        <div class="progress" aria-hidden="true"><i id="progBar"></i></div>
+        <button class="btn btn-next" id="nextBtn">Next</button>
+      </div>
+
+      <div class="reveal" id="finalReveal">
+        <div class="photo" id="photoBox"><img id="mainPhoto" src="C:\Users\lohin\Downloads\love\img.jpg" alt="Us together"></div>
+        <div class="final-msg" id="finalMsg">You are my everything. Come back to me. ❤<br><small style="display:block;margin-top:8px;opacity:0.8">— From: Me</small></div>
+        <div style="margin-top:6px"><button class="btn btn-next" id="doneBtn">Close</button></div>
+      </div>
+
+    </div>
+
+    <div class="film-bars bottom"></div>
+  </div>
+
+  <!-- optional audio -->
+  <audio id="bgMusic" src="C:\Users\lohin\Downloads\love\Roja Roja Bgm.mp3" loop preload="auto"></audio>
+
+  <script>
+    // ---------- Personalize these ----------
+    const quotes = [
+  { t: "నా కళ్లను మూసుకున్నా కూడా, మన మొదటి కలిసిన క్షణం నా మనసులో తిరుగుతూనే ఉంటుంది."},
+  { t: "నీ నవ్వు నా చెవుల్లో నచ్చిన పాటలా ప్రతిధ్వనిస్తుంది."},
+  { t: "నువ్వు ఉన్నావనే ఆనందంతో ఆకాశంలోని నక్షత్రాలను నీ పేరుతో రాసేదాన్ని."},
+  { t: "నిన్ను చూసే ప్రతి సాయంత్రం ఒక సినిమా సీన్‌లా అనిపిస్తుంది."},
+  { t: "ఎంత కోపంగా ఉన్నా, చివరికి నా హృదయం ఎప్పుడూ నిన్నే ఎంచుకుంటుంది."},
+  { t: "వెయ్యి క్షమాపణలతో నా ప్రేమను ఒక ముద్దులో చుట్టేశాను."},
+  { t: "నువ్వే నా తుఫానులో ప్రశాంతత, నేను తిరిగి చేరే తీరము." }
+];
+
+    const toName = 'Seershika'; // shown in final message
+    const fromName = 'Lohin';
+    const musicOn = true; // set false to disable music by default
+
+    // elements
+    const quoteText = document.getElementById('quoteText');
+    const quoteAuthor = document.getElementById('quoteAuthor');
+    const nextBtn = document.getElementById('nextBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const progBar = document.getElementById('progBar');
+    const finalReveal = document.getElementById('finalReveal');
+    const quoteCard = document.getElementById('quoteCard');
+    const mainPhoto = document.getElementById('mainPhoto');
+    const finalMsg = document.getElementById('finalMsg');
+    const doneBtn = document.getElementById('doneBtn');
+    const bgMusic = document.getElementById('bgMusic');
+
+    let idx = 0;
+
+    // initial state
+    function showQuote(i){
+      const q = quotes[i];
+      quoteCard.style.opacity = 0; quoteCard.style.transform = 'translateY(8px)';
+      setTimeout(()=>{
+        quoteText.textContent = `"${q.t}"`;
+        quoteAuthor.textContent = q.a;
+        quoteCard.style.opacity = 1; quoteCard.style.transform = 'translateY(0)';
+      }, 180);
+      updateProgress(i);
+    }
+
+    function updateProgress(i){
+      const pct = Math.round(((i) / (quotes.length)) * 100);
+      progBar.style.width = pct + '%';
+    }
+
+    nextBtn.addEventListener('click', ()=>{
+      idx++;
+      if(idx < quotes.length){
+        showQuote(idx);
+      } else {
+        // final reveal
+        revealFinal();
+      }
+    });
+
+    restartBtn.addEventListener('click', ()=>{
+      idx = 0; finalReveal.classList.remove('show'); quoteCard.style.display = 'block'; showQuote(0); progBar.style.width = '0%';
+    });
+
+    doneBtn.addEventListener('click', ()=>{ finalReveal.classList.remove('show'); });
+
+    function revealFinal(){
+      // cinematic zoom out animation
+      quoteCard.style.transform = 'scale(0.96) translateY(-12px)';
+      quoteCard.style.opacity = 0.28;
+      setTimeout(()=>{
+        finalMsg.innerHTML = `To <strong>${toName}</strong>,<br>Every line I said is true — you are my everything.<br><small style="display:block;margin-top:8px;opacity:0.8">— ${fromName}</small>`;
+        finalReveal.classList.add('show');
+        // show photo slightly after
+        mainPhoto.style.transform = 'scale(1.02)';
+        // try play music
+        if(musicOn){
+          bgMusic.play().catch(()=>{});
+        }
+        progBar.style.width = '100%';
+      }, 420);
+    }
+
+    // enable keyboard navigation: Space or Enter -> Next
+    document.addEventListener('keydown', (e)=>{
+      if(e.key===' '||e.key==='Enter'){
+        e.preventDefault(); nextBtn.click();
+      }
+    });
+
+    // small initial animation
+    window.addEventListener('load', ()=>{ showQuote(0); if(!musicOn){ bgMusic.pause(); } document.body.classList.add('ready'); });
+
+    // photo fallback
+    mainPhoto.addEventListener('error', ()=>{
+      mainPhoto.src = 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'><rect width='100%' height='100%' fill='#06060a'/><text x='50%' y='50%' fill='#888' font-size='22' font-family='Arial' text-anchor='middle' alignment-baseline='middle'>Place your-photo.jpg here (same folder)</text></svg>`);
+    });
+
+  </script>
+</body>
+</html>
